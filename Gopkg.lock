@@ -1323,6 +1323,14 @@
   revision = "0aaa050f9bab8160cf684130d0afa69ff582cbe6"
 
 [[projects]]
+  digest = "1:6f90719bb8bfcdc5d98e6baa35e51f93fc84d62cb8ceeb34a6d1e0abe7e28b51"
+  name = "github.com/mmcloughlin/geohash"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "70fef033b90f91ee33bc6f8ad52d6ee90e30900a"
+  version = "v0.10.0"
+
+[[projects]]
   branch = "master"
   digest = "1:753388e7be24c62a85e7758e3f6f45e719f9837c8f4a3ef07c38593d407939c7"
   name = "github.com/montanaflynn/stats"
@@ -2252,6 +2260,7 @@
     "github.com/mibk/dupl",
     "github.com/mitchellh/reflectwalk",
     "github.com/mmatczuk/go_generics/cmd/go_generics",
+    "github.com/mmcloughlin/geohash",
     "github.com/montanaflynn/stats",
     "github.com/nlopes/slack",
     "github.com/olekukonko/tablewriter",

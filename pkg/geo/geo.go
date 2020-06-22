@@ -14,12 +14,14 @@ package geo
 import (
 	"encoding/binary"
 
-	"github.com/cockroachdb/cockroach/pkg/geo/geopb"
-	"github.com/cockroachdb/cockroach/pkg/geo/geoprojbase"
 	"github.com/cockroachdb/errors"
 	"github.com/golang/geo/s2"
+	"github.com/mmcloughlin/geohash"
 	"github.com/twpayne/go-geom"
 	"github.com/twpayne/go-geom/encoding/ewkb"
+
+	"github.com/cockroachdb/cockroach/pkg/geo/geopb"
+	"github.com/cockroachdb/cockroach/pkg/geo/geoprojbase"
 )
 
 // DefaultEWKBEncodingFormat is the default encoding format for EWKB.
@@ -164,6 +166,20 @@ func MustParseGeometryFromEWKB(ewkb geopb.EWKB) *Geometry {
 		panic(err)
 	}
 	return ret
+}
+
+// ParseGeometryFromGeoHashWithPrecision makes a point from a GeoHash string.
+func ParseGeometryFromGeoHashWithPrecision(hash string, prec uint) (*Geometry, error) {
+	hint, _ := geohash.ConvertStringToInt(hash)
+	lat, lng := geohash.DecodeIntWithPrecision(hint, prec)
+	return NewGeometryFromPointCoords(lat, lng)
+}
+
+// ParseGeometryFromGeoHash returns a point based on full precision of the input GeoHash string.
+func ParseGeometryFromGeoHash(hash string) (*Geometry, error) {
+	hint, prec := geohash.ConvertStringToInt(hash)
+	lat, lng := geohash.DecodeIntWithPrecision(hint, prec)
+	return NewGeometryFromPointCoords(lng, lat)
 }
 
 // ParseGeometryFromGeoJSON parses the GeoJSON into a given Geometry.

@@ -238,6 +238,42 @@ func geometryFromWKBCheckShapeBuiltin(shape geopb.Shape) builtinDefinition {
 	)
 }
 
+func geometryFromGeoHashCheckShapeBuiltin(shape geopb.Shape) builtinDefinition {
+	return makeBuiltin(
+		defProps(),
+		bytesOverload1(
+			func(_ *tree.EvalContext, s string) (tree.Datum, error) {
+				g, err := geo.ParseGeometryFromGeoHash(s)
+				if err != nil {
+					return nil, err
+				}
+				if g.Shape() != shape {
+					return tree.DNull, nil
+				}
+				return tree.NewDGeometry(g), nil
+			},
+			types.Geometry,
+			infoBuilder{info: `Returns a new Point from a GeoHash string.`}.String(),
+			tree.VolatilityImmutable,
+		),
+		tree.Overload{
+			Types: tree.ArgTypes{{Name:"hash", Typ:types.String},{Name:"precision", Typ:types.Int4}},
+			ReturnType: tree.FixedReturnType(types.Geometry),
+			Fn: func(_ *tree.EvalContext, args tree.Datums) (tree.Datum, error) {
+				hash := string(*args[0].(*tree.DString))
+				prec := uint(*args[1].(*tree.DInt))
+				g, err := geo.ParseGeometryFromGeoHashWithPrecision(hash, prec)
+				if err != nil {
+					return nil, err
+				}
+				return tree.NewDGeometry(g), nil
+			},
+			Info:       infoBuilder{info: `Returns a new Point from a GeoHash string.`}.String(),
+			Volatility: tree.VolatilityImmutable,
+		},
+	)
+}
+
 // geographyFromText is the builtin for ST_GeomFromText/ST_GeographyFromText.
 var geographyFromText = makeBuiltin(
 	defProps(),
@@ -477,6 +513,7 @@ var geoBuiltins = map[string]builtinDefinition{
 	"st_multipolygonfromwkb":     geometryFromWKBCheckShapeBuiltin(geopb.Shape_MultiPolygon), // missing from PostGIS
 	"st_pointfromtext":           geometryFromTextCheckShapeBuiltin(geopb.Shape_Point),
 	"st_pointfromwkb":            geometryFromWKBCheckShapeBuiltin(geopb.Shape_Point),
+	"st_pointfromgeohash":        geometryFromGeoHashCheckShapeBuiltin(geopb.Shape_Point),
 	"st_polyfromtext":            geometryFromTextCheckShapeBuiltin(geopb.Shape_Polygon),
 	"st_polyfromwkb":             geometryFromWKBCheckShapeBuiltin(geopb.Shape_Polygon),
 	"st_polygonfromtext":         geometryFromTextCheckShapeBuiltin(geopb.Shape_Polygon),
